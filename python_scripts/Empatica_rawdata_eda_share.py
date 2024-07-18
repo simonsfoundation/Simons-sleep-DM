@@ -30,7 +30,7 @@ i = int(sys.argv[1])
     
 data_check = pd.read_csv('/mnt/home/user/Participants and devices - embrace data check.csv')[['User ID','Starting date','End Date']]
 
-df_id = pd.read_csv('/mnt/home/user/ceph/Sleep_study/SubjectsData/subjects_ids.csv').drop_duplicates()
+df_id = pd.read_csv('/mnt/ceph/users/nshah/Sleep_study-neelay/SubjectsData/subjects_ids.csv').drop_duplicates()
 
 df_id.drop_duplicates().sort_values('id', inplace = True)
 
@@ -106,10 +106,10 @@ def process_and_save_adjusted_days(subject_id,tzs_str,output_folder,shared_data_
 def eda_raw_data(i):
     
     #define path, folders, users 
-    participant_data_path = '/mnt/home/user/ceph/Sleep_study/SubjectsData/empatica/aws_data/1/1/participant_data/' # path to the folder that contains folder for each date
-    tz_temp = f'/mnt/home/user/ceph/Sleep_study/SubjectsData/raw_data/data_share/{subject_id[i]}/empatica/raw_data/eda/tz_temp' #output folder
+    participant_data_path = '/mnt/ceph/users/nshah/Sleep_study-neelay/SubjectsData/empatica/aws_data/1/1/participant_data/' # path to the folder that contains folder for each date
+    tz_temp = f'/mnt/ceph/users/nshah/Sleep_study-neelay/SubjectsData/raw_data/data_share/{subject_id[i]}/empatica/raw_data/eda/tz_temp' #output folder
     
-    output_folder = f'/mnt/home/user/ceph/Sleep_study/SubjectsData/data_share/{subject_id[i]}/empatica/raw_data/eda/' #output folder
+    output_folder = f'/mnt/ceph/users/nshah/Sleep_study-neelay/SubjectsData/data_share/{subject_id[i]}/empatica/raw_data/eda/' #output folder
     
     
     os.makedirs(output_folder,exist_ok=True)

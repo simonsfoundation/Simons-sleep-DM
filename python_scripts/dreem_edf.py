@@ -35,11 +35,11 @@ import shutil
 
 j = int(sys.argv[1])
 
-subject_id = pd.read_csv('/mnt/home/user/ceph/Sleep_study/SubjectsData/subjects_ids.csv')['id'].tolist()
-tzs_str = pd.read_csv('/mnt/home/user/ceph/Sleep_study/SubjectsData/subjects_ids.csv')['tz_str'].tolist()
+subject_id = pd.read_csv('/mnt/ceph/users/nshah/Sleep_study-neelay/SubjectsData/subjects_ids.csv')['id'].tolist()
+tzs_str = pd.read_csv('/mnt/ceph/users/nshah/Sleep_study-neelay/SubjectsData/subjects_ids.csv')['tz_str'].tolist()
 
-input_folder = f'/mnt/home/user/ceph/Sleep_study/SubjectsData/raw_data/harmonized_data/{subject_id[j]}/'
-output_folder = f'/mnt/home/user/ceph/Sleep_study/SubjectsData/data_share/{subject_id[j]}/dreem/'
+input_folder = f'/mnt/ceph/users/nshah/Sleep_study-neelay/SubjectsData/raw_data/harmonized_data/{subject_id[j]}/'
+output_folder = f'/mnt/ceph/users/nshah/Sleep_study-neelay/SubjectsData/data_share/{subject_id[j]}/dreem/'
 
 date_list = [re.search(r'\d{4}-\d{2}-\d{2}', file).group() for file in os.listdir(output_folder) if file.endswith(".edf") and not file.startswith("eeg") ]
     

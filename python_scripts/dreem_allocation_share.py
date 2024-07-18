@@ -25,8 +25,8 @@ import mne
 import time as timer
 
 
-source_dir = "/mnt/home/user/ceph/Sleep_study/SubjectsData/dreem/aws_data/"
-dest_base_dir = f'/mnt/home/user/ceph/Sleep_study/SubjectsData/raw_data/harmonized_data/'
+source_dir = "/mnt/ceph/users/nshah/Sleep_study-neelay/SubjectsData/dreem/aws_data/"
+dest_base_dir = f'/mnt/ceph/users/nshah/Sleep_study-neelay/SubjectsData/raw_data/harmonized_data/'
 
 # First extract error in filenames and repalce with correct filenames in the aws dir
 
@@ -139,8 +139,8 @@ def dreem_allocation():
 
     #excute
 
-    source_dir = "/mnt/home/user/ceph/Sleep_study/SubjectsData/dreem/aws_data/"
-    dest_base_dir = f'/mnt/home/user/ceph/Sleep_study/SubjectsData/raw_data/harmonized_data/'
+    source_dir = "/mnt/ceph/users/nshah/Sleep_study-neelay/SubjectsData/dreem/aws_data/"
+    dest_base_dir = f'/mnt/ceph/users/nshah/Sleep_study-neelay/SubjectsData/raw_data/harmonized_data/'
 
     # activate data acllocation function 
     move_files(source_dir, dest_base_dir)

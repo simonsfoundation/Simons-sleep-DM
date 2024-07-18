@@ -37,12 +37,12 @@ df_temp = pd.DataFrame()
 
 aggregated_data_path = None
     
-users = pd.read_csv('/mnt/home/user/ceph/Sleep_study/SubjectsData/subjects_ids.csv')['id'].tolist()
-tzs = pd.read_csv('/mnt/home/user/ceph/Sleep_study/SubjectsData/subjects_ids.csv')['tz'].tolist()
-tzs_str = pd.read_csv('/mnt/home/user/ceph/Sleep_study/SubjectsData/subjects_ids.csv')['tz_str'].tolist()
+users = pd.read_csv('/mnt/ceph/users/nshah/Sleep_study-neelay/SubjectsData/subjects_ids.csv')['id'].tolist()
+tzs = pd.read_csv('/mnt/ceph/users/nshah/Sleep_study-neelay/SubjectsData/subjects_ids.csv')['tz'].tolist()
+tzs_str = pd.read_csv('/mnt/ceph/users/nshah/Sleep_study-neelay/SubjectsData/subjects_ids.csv')['tz_str'].tolist()
 
 measure = ['pulse-rate', 'prv','activity-counts', 'sleep','step','respiratory','wearing-detection']
-participant_data_path = '/mnt/home/user/ceph/Sleep_study/SubjectsData/empatica/aws_data/1/1/participant_data/'
+participant_data_path = '/mnt/ceph/users/nshah/Sleep_study-neelay/SubjectsData/empatica/aws_data/1/1/participant_data/'
 
 
 
@@ -50,7 +50,7 @@ data_check = pd.read_csv('/mnt/home/user/Participants and devices - embrace data
 
 data_check.sort_values('Starting date', inplace = True)
 
-df_id = pd.read_csv('/mnt/home/user/ceph/Sleep_study/SubjectsData/subjects_ids.csv').drop_duplicates()
+df_id = pd.read_csv('/mnt/ceph/users/nshah/Sleep_study-neelay/SubjectsData/subjects_ids.csv').drop_duplicates()
 
 df_id.drop_duplicates().sort_values('id', inplace = True)
 
@@ -174,7 +174,7 @@ if d == sorted(dates)[-1] and not agg_emp_all.empty:
     print(f'{user} {target_timezone}')
     agg_emp_all['timestamp_iso'] = agg_emp_all['timestamp_iso'].dt.tz_convert(target_timezone)
 
-    target_path = f'/mnt/home/user/ceph/Sleep_study/SubjectsData/data_share/{user}/empatica/summarized_data'
+    target_path = f'/mnt/ceph/users/nshah/Sleep_study-neelay/SubjectsData/data_share/{user}/empatica/summarized_data'
 
     
     if os.path.isdir(target_path):

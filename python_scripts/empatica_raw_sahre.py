@@ -23,14 +23,14 @@ import shutil
 
 
 command = [
-    'sbatch', '/mnt/home/user/slurm_files/slurm_raw_acc_share.sh',
+    'sbatch', '/mnt/ceph/users/nshah/Simons-sleep-DM/slurm_scripts/slurm_raw_acc_share.sh',
 ]
 subprocess.run(command)
 
 timer.sleep(120 * 60)  # 60 minutes * 60 seconds
 
 command = [
-    'sbatch', '/mnt/home/user/slurm_files/slurm_raw_bvp_share.sh',
+    'sbatch', '/mnt/ceph/users/nshah/Simons-sleep-DM/slurm_scripts/slurm_raw_bvp_share.sh',
 ]
 subprocess.run(command)
 
@@ -38,20 +38,20 @@ timer.sleep(120 * 60)  # 60 minutes * 60 seconds
 
 
 command = [
-    'sbatch', '/mnt/home/user/slurm_files/slurm_raw_eda_share.sh',
+    'sbatch', '/mnt/ceph/users/nshah/Simons-sleep-DM/slurm_scripts/slurm_raw_eda_share.sh',
 ]
 subprocess.run(command)
 timer.sleep(60 * 60)  # 60 minutes * 60 seconds
 
 
 # command = [
-#     'sbatch', '/mnt/home/user/slurm_files/slurm_raw_gyro_share.sh',
+#     'sbatch', '/mnt/ceph/users/nshah/Simons-sleep-DM/slurm_scripts/slurm_raw_gyro_share.sh',
 # ]
 # subprocess.run(command)
 # timer.sleep(60 * 60)  # 60 minutes * 60 seconds
 
 
 command = [
-    'sbatch', '/mnt/home/user/slurm_files/slurm_raw_temp_share.sh',
+    'sbatch', '/mnt/ceph/users/nshah/Simons-sleep-DM/slurm_scripts/slurm_raw_temp_share.sh',
 ]
 subprocess.run(command)

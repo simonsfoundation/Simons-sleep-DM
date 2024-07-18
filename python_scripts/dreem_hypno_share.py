@@ -137,9 +137,9 @@ def get_dreem_hypno(subject_id, directory):
     return df_dreem
 
 
-subject_id = pd.read_csv('/mnt/home/user/ceph/Sleep_study/SubjectsData/subjects_ids.csv')['id'].tolist()
-subject_tz = pd.read_csv('/mnt/home/user/ceph/Sleep_study/SubjectsData/subjects_ids.csv')['tz'].tolist()
-tzs_str = pd.read_csv('/mnt/home/user/ceph/Sleep_study/SubjectsData/subjects_ids.csv')['tz_str'].tolist()
+subject_id = pd.read_csv('/mnt/ceph/users/nshah/Sleep_study-neelay/SubjectsData/subjects_ids.csv')['id'].tolist()
+subject_tz = pd.read_csv('/mnt/ceph/users/nshah/Sleep_study-neelay/SubjectsData/subjects_ids.csv')['tz'].tolist()
+tzs_str = pd.read_csv('/mnt/ceph/users/nshah/Sleep_study-neelay/SubjectsData/subjects_ids.csv')['tz_str'].tolist()
 
 # Convert Dreem Hypmnogram to desired format 
 
@@ -147,8 +147,8 @@ tzs_str = pd.read_csv('/mnt/home/user/ceph/Sleep_study/SubjectsData/subjects_ids
 
 for j in range(len(subject_id)):
     
-    directory = f'/mnt/home/user/ceph/Sleep_study/SubjectsData/data_share/{subject_id[j]}/dreem/hypno/'
-    output_folder = f'/mnt/home/user/ceph/Sleep_study/SubjectsData/data_share/{subject_id[j]}/dreem/hypno/'
+    directory = f'/mnt/ceph/users/nshah/Sleep_study-neelay/SubjectsData/data_share/{subject_id[j]}/dreem/hypno/'
+    output_folder = f'/mnt/ceph/users/nshah/Sleep_study-neelay/SubjectsData/data_share/{subject_id[j]}/dreem/hypno/'
     
     if not os.path.isdir(directory):
             os.makedirs(directory)
