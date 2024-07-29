@@ -33,7 +33,7 @@ def process_participant_data(participant):
     user = participant['SubjectId']
     spid = participant['SPID']
     tz_str = participant['tz_str']
-    agg_emp_all = None
+    agg_emp_all = pd.DataFrame()
 
     for d in dates:
         if not os.path.isdir(os.path.join(participant_data_path,d)):
