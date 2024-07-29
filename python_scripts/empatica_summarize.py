@@ -1,28 +1,11 @@
-import matplotlib.pyplot as plt
 import datetime as dt
-from datetime import datetime
-import json
 import os
 import glob 
 import pytz
-import numpy as np
 import pandas as pd
-import re
-import scipy
-#import seaborn as sns
-from scipy import signal
-import ast
-from scipy.stats import kendalltau, pearsonr, spearmanr,linregress
-#import matplotlib as mpl
-#import matplotlib.pyplot as plt
-#from matplotlib.collections import LineCollection
-#from matplotlib.colors import ListedColormap, BoundaryNorm
-#import matplotlib.dates as mdates
+from multiprocessing import Pool
 import sys
 import datetime as dt
-from datetime import timedelta
-from datetime import time
-import subprocess
 import warnings
 warnings.filterwarnings("ignore")
 import ast
@@ -261,6 +244,10 @@ if __name__ == '__main__':
     
     if args.spid:
         df = df.loc[df.SPID == args.spid]
-    for _, participant in df.iterrows():
-        process_participant_data(participant)
-        # sys.exit(1)
+
+    participants = [participant for _, participant in df.iterrows()]
+
+    workers = Pool(int(os.environ['WORKERS']) if os.environ['WORKERS'] else 14)
+    results = workers.map(process_participant_data, participants)
+    workers.close()
+    workers.join()
