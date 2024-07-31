@@ -6,7 +6,6 @@ from avro.io import DatumReader
 import json
 import numpy as np
 from multiprocessing import Pool
-from itertools import product
 from datetime import datetime
 
 # DATA_DIR = os.environ['DATA_DIR']

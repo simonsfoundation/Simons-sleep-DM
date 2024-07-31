@@ -9,11 +9,9 @@ import os
 from functools import partial
 
 """
-python python_scripts/Empatica_rawdata_process.py -d /mnt/home/nshah/ceph/Sleep_study-neelay/SubjectsData/data_share_test -o /mnt/home/nshah/ceph/Sleep_study-neelay/SubjectsData/export_data --workers 16  --spid SP0252854
+python python_scripts/empatica_rawdata_process.py -d /mnt/home/nshah/ceph/Sleep_study-neelay/SubjectsData/data_share_test -o /mnt/home/nshah/ceph/Sleep_study-neelay/SubjectsData/export_data --workers 16  --spid SP0252854
 """
 BASE_DIR = os.getcwd()
-
-
 os.environ["BASE_DIR"] = BASE_DIR
     
 
