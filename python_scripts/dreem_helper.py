@@ -64,9 +64,43 @@ def move_files(file_users_map, participants, source_dir):
                 dest_dir = f"{os.environ['OUTPUT_DATA_DIR']}/{participant['spid']}/dreem/{dir_type}/" 
                 if not os.path.exists(dest_dir):
                     os.makedirs(dest_dir)
+
                 if filename not in os.listdir(dest_dir):
                     shutil.copy(os.path.join(file_dir, filename), os.path.join(dest_dir, filename))
                     
+
+
+def dreem_process_report(participant):
+    OUTPUT_DATA_DIR = os.environ['OUTPUT_DATA_DIR']
+    user_id = participant['user_id']
+    spid = participant['spid']
+    tz_str = participant['tz_str']
+
+    directory = f'{OUTPUT_DATA_DIR}/{spid}/dreem/dreem_reports'
+
+    for file in os.listdir(directory):
+        try:
+            datetime_str = file.split('beacon.study_')[-1].replace('_endpoints.csv','')
+            datetime_obj = dt_parser.parse(datetime_str)
+        except Exception as e:
+            continue
+
+        target_tz = pytz.timezone(tz_str)
+        utc_fix = False
+
+        if datetime_obj.tzinfo != target_tz:
+            utc_fix = True
+            datetime_obj = datetime_obj.astimezone(target_tz)
+        
+        file_date = datetime_obj.date()
+        filename = f'dream_report_{spid}_{file_date}.csv'
+        # print(file,'>>>>', file_date,'>>>>',f'{directory}/{filename}')
+        os.rename(f'{directory}/{file}', f'{directory}/{filename}')
+
+    date_list=[]
+    date = None
+    
+
 
 
 def dreem_process_edf(participant):
@@ -215,12 +249,9 @@ def dreem_process_hypno(participant):
 
         for filename in os.listdir(directory):
             if 'hypnogram' in filename:
-                
                 try:
-                
                     datetime_str = filename.split('@')[1].split('.')[1]
                     datetime_str= datetime_str.split('_')[1]
-    
     
                     # Parse the datetime string into a datetime object, including the timezone
                     if '[05-00]' in datetime_str:
