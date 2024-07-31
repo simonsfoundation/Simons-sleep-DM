@@ -11,7 +11,7 @@ import glob
 from multiprocessing import Pool
 
 """
-python python_scripts/dreem_rawdata_process.py -d /var/www/Simons-sleep-DM/Data/data_share_test -o /var/www/Simons-sleep-DM/Data/export --spid SP0489864
+ython python_scripts/withing_rawdata_process.py -d /var/www/Simons-sleep-DM/Data/data_share_test -o /var/www/Simons-sleep-DM/Data/export
 
 """
 BASE_DIR = os.getcwd()
