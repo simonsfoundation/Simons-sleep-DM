@@ -182,19 +182,19 @@ if __name__ == '__main__':
     # print(participants,'>>>>>>>>>>>>>')
     ## move raw data files to ouput directory by user 
     print("moving raw data files to ouput directory by user")
-    # move_files(file_users_map, participants, source_dir)
+    move_files(file_users_map, participants, source_dir)
     
     pDf = pd.DataFrame(participants.values())
     if args.spid:
         pDf = pDf.loc[pDf.spid == args.spid]
     
     participants = list(pDf.T.to_dict().values())
-    # print(f"Processing dreem_process_hypno for {len(participants)} participants {datetime.now()}")
-    # workers = Pool(int(os.environ['WORKERS']) if os.environ['WORKERS'] else 14)
-    # results = workers.map(dreem_process_hypno, participants)
-    # workers.close()
-    # workers.join()
-    # print(f"Completed Processing dreem_process_edf for {len(participants)} participants {datetime.now()}")
+    print(f"Processing dreem_process_hypno for {len(participants)} participants {datetime.now()}")
+    workers = Pool(int(os.environ['WORKERS']) if os.environ['WORKERS'] else 14)
+    results = workers.map(dreem_process_hypno, participants)
+    workers.close()
+    workers.join()
+    print(f"Completed Processing dreem_process_edf for {len(participants)} participants {datetime.now()}")
 
     print(f"Processing dreem_process_edf for {len(participants)} participants {datetime.now()}")
     workers = Pool(int(os.environ['WORKERS']) if os.environ['WORKERS'] else 14)
