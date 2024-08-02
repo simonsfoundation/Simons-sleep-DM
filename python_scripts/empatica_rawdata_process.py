@@ -11,7 +11,7 @@ from functools import partial
 """
 python python_scripts/empatica_rawdata_process.py -d /mnt/home/nshah/ceph/Sleep_study-neelay/SubjectsData/data_share_test -o /mnt/home/nshah/ceph/Sleep_study-neelay/SubjectsData/export_data --workers 16  --spid SP0252854
 """
-BASE_DIR = os.getcwd()
+BASE_DIR = __file__.split('/python_scripts/')[0]
 os.environ["BASE_DIR"] = BASE_DIR
     
 
@@ -100,7 +100,7 @@ if __name__ == '__main__':
     data_check =data_check.apply(process_data, axis=1)
 
     df = dfSpid.merge(data_check, on='User ID', how = 'inner')
-    df.to_csv(f"{BASE_DIR}/temp.csv", index=False)
+    # df.to_csv(f"{BASE_DIR}/temp.csv", index=False)
 
     if args.spid:
         df = df.loc[df['SPID'] == args.spid]

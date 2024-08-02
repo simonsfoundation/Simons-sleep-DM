@@ -5,12 +5,11 @@ import pandas as pd
 from dreem_helper import *
 
 """
-python python_scripts/dreem_rawdata_process.py -d /mnt/home/nshah/ceph/Sleep_study-neelay/SubjectsData/data_share_test -o /mnt/home/nshah/ceph/Sleep_study-neelay/SubjectsData/export_data --workers 16  --spid SP0252854
-"""
-BASE_DIR = os.getcwd()
-os.environ["BASE_DIR"] = BASE_DIR
-    
+python python_scripts/dreem_rawdata_process.py -d /var/www/Simons-sleep-DM/Data/data_share_test -o /var/www/Simons-sleep-DM/Data/export --spid SP0489864
 
+"""
+BASE_DIR = __file__.split('/python_scripts/')[0]
+os.environ["BASE_DIR"] = BASE_DIR
 
      
 def get_dreem_allocation_mapping():
@@ -134,7 +133,7 @@ if __name__ == '__main__':
                     new_path = os.path.join(os.path.join(source_dir,dir_type), filename.replace(user_wrong[i].iloc[0],user_fixed[i].iloc[0]))
                     os.rename(old_name,new_path)
 
-    print("\n\n\n\n\n\n")
+    print("\n\n\n")
     dfSpid = pd.read_csv(f'{BASE_DIR}/sleep_subject_ids.csv').drop_duplicates()
     df = pd.read_csv(f'{BASE_DIR}/subjects_ids.csv').drop_duplicates()
     dfSpid['User ID'] = pd.to_numeric(dfSpid['SubjectId'].str.replace('U',''))
@@ -182,7 +181,7 @@ if __name__ == '__main__':
     # print(participants,'>>>>>>>>>>>>>')
     ## move raw data files to ouput directory by user 
     print("moving raw data files to ouput directory by user")
-    # move_files(file_users_map, participants, source_dir)
+    move_files(file_users_map, participants, source_dir)
     
     pDf = pd.DataFrame(participants.values())
     if args.spid:

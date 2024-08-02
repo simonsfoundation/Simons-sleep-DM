@@ -14,7 +14,7 @@ from multiprocessing import Pool
 ython python_scripts/withing_rawdata_process.py -d /var/www/Simons-sleep-DM/Data/data_share_test -o /var/www/Simons-sleep-DM/Data/export
 
 """
-BASE_DIR = os.getcwd()
+BASE_DIR = __file__.split('/python_scripts/')[0]
 os.environ["BASE_DIR"] = BASE_DIR
     
 
@@ -96,17 +96,31 @@ def process_withings_shared_data(participant):
 
                         elif 'from' in dfi.columns:
                             date_columns = ['from','to']
+                            dfi['from'] = pd.to_datetime(dfi['from'],utc=True)
+                            dfi['to'] = pd.to_datetime(dfi['to'],utc=True)
 
-                        target_timezone = pytz.timezone(tz_str) 
-                        for col in date_columns: 
-                            dfi[col] = pd.to_datetime(dfi[col],utc=True)
-                            dfi[col] = dfi[col].dt.tz_convert(target_timezone)                        
-                            dfi['date_corrected'] = dfi[col].apply(lambda x: x if (pd.notna(x) and x.strftime('%Y-%m-%d') in dates) or
-                                                                   ((x + timedelta(days=1)).strftime('%Y-%m-%d') in dates) else pd.NaT)
- 
-                        dfi = dfi.sort_values(date_columns)
-                        dfi = dfi.drop_duplicates()
-                        dfi.to_csv(os.path.join(output_share_dir,file_name), index = False)
+                            target_timezone = pytz.timezone(tz_str) 
+
+                            dfi['from'] = dfi['from'].dt.tz_convert(target_timezone)
+                            dfi['to'] = dfi['to'].dt.tz_convert(target_timezone)
+
+                            dfi.to_csv(os.path.join(output_share_dir,file_name), index = False)
+                            continue
+
+                        else:
+                            dfi.to_csv(os.path.join(output_share_dir,file_name), index = False)
+                            continue
+
+                    target_timezone = pytz.timezone(tz_str) 
+                    for col in date_columns: 
+                        dfi[col] = pd.to_datetime(dfi[col],utc=True)
+                        dfi[col] = dfi[col].dt.tz_convert(target_timezone)                        
+                        dfi['date_corrected'] = dfi[col].apply(lambda x: x if (pd.notna(x) and x.strftime('%Y-%m-%d') in dates) or
+                                                                ((x + timedelta(days=1)).strftime('%Y-%m-%d') in dates) else pd.NaT)
+
+                    dfi = dfi.sort_values(date_columns)
+                    dfi = dfi.drop_duplicates()
+                    dfi.to_csv(os.path.join(output_share_dir,file_name), index = False)
 
     # for file in os.listdir(output_share_dir):
     #         if file.startswith('withings'):

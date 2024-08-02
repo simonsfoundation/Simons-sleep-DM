@@ -224,7 +224,7 @@ if __name__ == '__main__':
     os.environ['DATA_DIR'] = args.data_dir
     os.environ['OUTPUT_DATA_DIR'] = args.output_data_dir
     os.environ['WORKERS'] = str(args.workers)
-    BASE_DIR = os.getcwd()
+    BASE_DIR = __file__.split('/python_scripts/')[0]
     os.environ["BASE_DIR"] = BASE_DIR
 
 
