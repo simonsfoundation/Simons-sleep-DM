@@ -63,64 +63,71 @@ def process_withings_shared_data(participant):
             with zipfile.ZipFile(zip_path, 'r') as zip_ref:
                 if any("raw_bed_Pressure.csv" in file for file in zip_ref.namelist()):
                     input_zip = zip_path  # Take the first .zip file found
-
         break
 
 
 
     if input_zip:
         # Open the zip file
-        with zipfile.ZipFile(input_zip, 'r') as zip_ref:
-            # Extract all the contents into the directory
-            zip_ref.extractall(input_folder_wit)
-
-            for file in os.listdir(input_folder_wit):
-                if file in ['raw_bed_Pressure.csv','raw_bed_HR RMS SD.csv',
-                            'raw_bed_HR SD NN.csv','raw_bed_hr.csv','sleep.csv']:
-
-                    if file.endswith('.csv'):
-                        file_type = file.replace('raw_bed_','').replace('.csv','')
-                        file_name = f'withing_{file_type}_{spid}.csv'
+        # with zipfile.ZipFile(input_zip, 'r') as zip_ref:
+        #     # Extract all the contents into the directory
+        #     zip_ref.extractall(input_folder_wit)
+        #     print(os.listdir(input_folder_wit),'>>>>>>>>>>>>>>.')
+        #     return
+            # for file in os.listdir(input_folder_wit):
+        for file in ['raw_bed_Pressure.csv','raw_bed_HR RMS SD.csv',
+                        'raw_bed_HR SD NN.csv','raw_bed_hr.csv','sleep.csv', 
+                        'raw_bed_respiratory-rate.csv']:
                         
-                        dfi = pd.read_csv(os.path.join(input_folder_wit,file))
-                        if dfi.empty:
-                            continue
-                        if 'start' in dfi.columns:
-                            date_columns = ['start']
+            with zipfile.ZipFile(input_zip, 'r') as zip_ref:
+                
+                file_type = file.replace('raw_bed_','').replace('.csv','')
+                if file == 'sleep.csv':
+                    file_name = f'withings_report_{spid}.csv'
+                else:
+                    file_name = f'withings_{file_type}_{spid}.csv'
+                
+                with zip_ref.open(file) as zf:
+                    dfi = pd.read_csv(zf)
+                    
+                    if dfi.empty:
+                        continue
+                    if 'start' in dfi.columns:
+                        date_columns = ['start']
 
-                        elif 'date' in dfi.columns:
-                            date_columns = ['date']
+                    elif 'date' in dfi.columns:
+                        date_columns = ['date']
 
-                        elif 'Date' in dfi.columns:
-                            date_columns = ['Date']
+                    elif 'Date' in dfi.columns:
+                        date_columns = ['Date']
 
-                        elif 'from' in dfi.columns:
-                            date_columns = ['from','to']
-                            dfi['from'] = pd.to_datetime(dfi['from'],utc=True)
-                            dfi['to'] = pd.to_datetime(dfi['to'],utc=True)
+                    elif 'from' in dfi.columns:
+                        date_columns = ['from','to']
+                        dfi['from'] = pd.to_datetime(dfi['from'],utc=True)
+                        dfi['to'] = pd.to_datetime(dfi['to'],utc=True)
 
-                            target_timezone = pytz.timezone(tz_str) 
+                        target_timezone = pytz.timezone(tz_str) 
 
-                            dfi['from'] = dfi['from'].dt.tz_convert(target_timezone)
-                            dfi['to'] = dfi['to'].dt.tz_convert(target_timezone)
+                        dfi['from'] = dfi['from'].dt.tz_convert(target_timezone)
+                        dfi['to'] = dfi['to'].dt.tz_convert(target_timezone)
 
-                            dfi.to_csv(os.path.join(output_share_dir,file_name), index = False)
-                            continue
+                        dfi.to_csv(os.path.join(output_share_dir,file_name), index = False)
+                        continue
 
-                        else:
-                            dfi.to_csv(os.path.join(output_share_dir,file_name), index = False)
-                            continue
+                    else:
+                        dfi.to_csv(os.path.join(output_share_dir,file_name), index = False)
+                        continue
 
-                    target_timezone = pytz.timezone(tz_str) 
-                    for col in date_columns: 
-                        dfi[col] = pd.to_datetime(dfi[col],utc=True)
-                        dfi[col] = dfi[col].dt.tz_convert(target_timezone)                        
-                        dfi['date_corrected'] = dfi[col].apply(lambda x: x if (pd.notna(x) and x.strftime('%Y-%m-%d') in dates) or
-                                                                ((x + timedelta(days=1)).strftime('%Y-%m-%d') in dates) else pd.NaT)
+                target_timezone = pytz.timezone(tz_str) 
+                for col in date_columns: 
+                    dfi[col] = pd.to_datetime(dfi[col],utc=True)
+                    dfi[col] = dfi[col].dt.tz_convert(target_timezone)                        
+                    dfi['date_corrected'] = dfi[col].apply(lambda x: x if (pd.notna(x) and x.strftime('%Y-%m-%d') in dates) or
+                                                            ((x + timedelta(days=1)).strftime('%Y-%m-%d') in dates) else pd.NaT)
 
-                    dfi = dfi.sort_values(date_columns)
-                    dfi = dfi.drop_duplicates()
-                    dfi.to_csv(os.path.join(output_share_dir,file_name), index = False)
+                dfi = dfi.sort_values(date_columns)
+                dfi = dfi.drop_duplicates()
+                dfi.to_csv(os.path.join(output_share_dir,file_name), index = False)
 
     # for file in os.listdir(output_share_dir):
     #         if file.startswith('withings'):
