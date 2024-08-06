@@ -77,21 +77,23 @@ def acc_process_date_files(payload):
                             schema = json.loads(reader.meta.get('avro.schema').decode('utf-8'))
                             data = []
                             for datum in reader:
-                                acc = datum["rawData"]["accelerometer"]  # access specific metric
-                                startSeconds = acc["timestampStart"] / 1000000  # convert timestamp to seconds
-                                timeSeconds = list(range(0, len(acc['x'])))
-                                if acc["samplingFrequency"] == 0:
-                                    acc["samplingFrequency"] = 64
-                                timeUNIX = [t / acc["samplingFrequency"] + startSeconds for t in timeSeconds]
-                                delta_physical = acc["imuParams"]["physicalMax"] - acc["imuParams"]["physicalMin"]
-                                delta_digital = acc["imuParams"]["digitalMax"] - acc["imuParams"]["digitalMin"]
-                                acc['x'] = [val * delta_physical / delta_digital for val in acc["x"]]
-                                acc['y'] = [val * delta_physical / delta_digital for val in acc["y"]]
-                                acc['z'] = [val * delta_physical / delta_digital for val in acc["z"]]
+                                try:
+                                    acc = datum["rawData"]["accelerometer"]  # access specific metric
+                                    startSeconds = acc["timestampStart"] / 1000000  # convert timestamp to seconds
+                                    timeSeconds = list(range(0, len(acc['x'])))
+                                    if acc["samplingFrequency"] == 0:
+                                        acc["samplingFrequency"] = 64
+                                    timeUNIX = [t / acc["samplingFrequency"] + startSeconds for t in timeSeconds]
+                                    delta_physical = acc["imuParams"]["physicalMax"] - acc["imuParams"]["physicalMin"]
+                                    delta_digital = acc["imuParams"]["digitalMax"] - acc["imuParams"]["digitalMin"]
+                                    acc['x'] = [val * delta_physical / delta_digital for val in acc["x"]]
+                                    acc['y'] = [val * delta_physical / delta_digital for val in acc["y"]]
+                                    acc['z'] = [val * delta_physical / delta_digital for val in acc["z"]]
 
-                                df_acTot = pd.DataFrame({'time': timeUNIX, 'x': acc['x'], 'y': acc['y'], 'z': acc['z']})
-                                dfs.append(df_acTot)
-
+                                    df_acTot = pd.DataFrame({'time': timeUNIX, 'x': acc['x'], 'y': acc['y'], 'z': acc['z']})
+                                    dfs.append(df_acTot)
+                                except Exception as e:
+                                    print(f'Error : {avro_file} : {e}')
                         if dfs:
                             daily_df = pd.concat(dfs, ignore_index=True)
                             daily_filename = f'{tz_temp}/empatica_acc_{spid}_{date}.csv'
@@ -115,7 +117,7 @@ def acc_raw_data(participant):
     tz_str = participant['tz_str']
     print(f"Processing acc raw data for {spid}::{user_id} {datetime.now()}")
                                  
-    #define path, folders, uzaser 
+    #define path, folders, uzaser SP0114386
     participant_data_path = f'{DATA_DIR}/empatica/aws_data/1/1/participant_data/' # path to the folder that contains folder for each date
     tz_temp = f'{OUTPUT_DATA_DIR}/{spid}/empatica/raw_data/acc/tz_temp' #output folder    
     output_folder = f'{OUTPUT_DATA_DIR}/{spid}/empatica/raw_data/acc/' #output folder
