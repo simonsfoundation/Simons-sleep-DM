@@ -157,6 +157,9 @@ if __name__ == '__main__':
                 tz_str = dft['tz_str'].to_list()[0]
 
             if spid:
+                if args.spid and spid != args.spid:
+                    continue
+
                 file_users_map[k].add(user_id)
                 # spids.add(spid)
                 if spid not in participants:
@@ -196,6 +199,13 @@ if __name__ == '__main__':
     workers.join()
     print(f"Completed Processing dreem_process_hypno for {len(participants)} participants {datetime.now()}")
 
+    print(f"Processing dreem_process_report for {len(participants)} participants {datetime.now()}")
+    workers = Pool(int(os.environ['WORKERS']) if os.environ['WORKERS'] else 14)
+    results = workers.map(dreem_process_report, participants)
+    workers.close()
+    workers.join()
+    print(f"Completed Processing dreem_process_report for {len(participants)} participants {datetime.now()}")
+
     print(f"Processing dreem_process_edf for {len(participants)} participants {datetime.now()}")
     workers = Pool(int(os.environ['WORKERS']) if os.environ['WORKERS'] else 14)
     results = workers.map(dreem_process_edf, participants)
@@ -203,10 +213,5 @@ if __name__ == '__main__':
     workers.join()
     print(f"Completed Processing dreem_process_edf for {len(participants)} participants {datetime.now()}")
     
-    print(f"Processing dreem_process_report for {len(participants)} participants {datetime.now()}")
-    workers = Pool(int(os.environ['WORKERS']) if os.environ['WORKERS'] else 14)
-    results = workers.map(dreem_process_report, participants)
-    workers.close()
-    workers.join()
-    print(f"Completed Processing dreem_process_report for {len(participants)} participants {datetime.now()}")
+    
         

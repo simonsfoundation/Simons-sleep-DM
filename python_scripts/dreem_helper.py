@@ -6,10 +6,11 @@ from avro.io import DatumReader
 import json, re
 import numpy as np
 from multiprocessing import Pool
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from dateutil import parser as dt_parser
 import shutil
 import mne
+import EDFlib
 from pathlib import Path
 
 
@@ -48,18 +49,19 @@ def move_files(file_users_map, participants, source_dir):
             users = file_users_map.get(simons_sleep_id)
             
             participant = None
-            for user in users:
-                p = participants.get(user)
-                if p:
-                    if (p['start_date'] <= file_date <= p['end_date']):
-                        if participant is not None:
-                            raise Exception(f"multiple users for file {filename}: {participant['user_id']}, {p['user_ud']}")
-                        participant = p
-                else:
-                    print(f"Error : can't find  user data for {user}")
+            if users:
+                for user in users:
+                    p = participants.get(user)
+                    if p:
+                        if (p['start_date'] <= file_date <= p['end_date']):
+                            if participant is not None:
+                                raise Exception(f"multiple users for file {filename}: {participant['user_id']}, {p['user_ud']}")
+                            participant = p
+                    else:
+                        print(f"Error : can't find  user data for {user}")
 
             if participant is None:
-                print("Error : can't find participant for file : {file}")
+                print(f"Error : can't find participant for file : {filename}")
             else:
                 dest_dir = f"{os.environ['OUTPUT_DATA_DIR']}/{participant['spid']}/dreem/{dir_type}/" 
                 
@@ -103,6 +105,92 @@ def dreem_process_report(participant):
     
 
 
+def __update_eeg_timezone(payload):
+    pathi, spid, user_id, tz_str = payload
+    OUTPUT_DATA_DIR = os.environ['OUTPUT_DATA_DIR']
+    output_folder = f'{OUTPUT_DATA_DIR}/{spid}/dreem'
+    edf_out = output_folder + '/edf/'
+    
+    try:
+        match = re.search(r'(\d{4}-\d{2}-\d{2})T', pathi)
+        if match:
+            file_date = re.search(r'\d{4}-\d{2}-\d{2}', pathi).group()
+            if not file_date:
+                file_date = re.search(r'\d{4}:\d{2}:\d{2}', pathi).group()
+
+    except Exception as e:
+        print(f"Error : {spid}::{user_id} processing data for {pathi}: {e}")
+        return
+
+    path_edf = pathi
+    # file_date = datetime.strptime(file_date, '%Y-%m-%d').date()
+    if path_edf:
+        try:
+            filename = path_edf
+            datetime_str = filename.split('@')[1].split('.')[1]
+            # print(datetime_str)
+            datetime_str= datetime_str.split('_')[1]
+            
+            # Parse the datetime string into a datetime object, including the timezone
+            datetime_obj = dt_parser.parse(datetime_str)
+            # Define the target timezone
+            target_tz = pytz.timezone(tz_str)
+            utc_fix = False
+            
+            if datetime_obj.tzinfo != target_tz:
+                utc_fix = True
+                datetime_obj = datetime_obj.astimezone(target_tz)
+                print(f"Time adjusted to: {target_tz}")
+
+            file_time = datetime_obj.time()
+            file_tz = datetime_obj.tzinfo
+            
+            # Check if the time adjustment crosses over to the next day
+            if file_time > datetime.strptime('19:00:00', '%H:%M:%S').time():
+                datetime_obj += timedelta(days=1)  # Add one day
+
+            file_date = datetime_obj.date()
+
+            path_edf = os.path.join(edf_out, path_edf)
+            # Check the size of the file
+            file_size = os.path.getsize(path_edf)  # Get file size in bytes
+            size_limit = 10 * 1024 * 1024  # 10MB in bytes ~ 1 hour of recording
+
+            if file_size < size_limit:
+                print(f"{spid}:: File {path_edf} is smaller than 20MB and will be deleted.")
+                os.remove(path_edf)  # Delete the file
+                return
+            else:
+                print(f'{spid}::processing {path_edf}')
+                # Proceed with loading the EDF file as it meets the size criteria
+                EEG = mne.io.read_raw_edf(path_edf, preload=True)
+                
+                if utc_fix == True:
+                    datetime_obj_utc = datetime_obj.astimezone(pytz.UTC)
+                    datetime_obj_utc = datetime_obj_utc.replace(tzinfo=timezone.utc)
+                    print(f"Time adjusted to: {datetime_obj_utc}")
+
+                    EEG.set_meas_date(datetime_obj_utc)
+                    # issue with expotred data - Neelay:
+                    EEG.export(f'{path_edf}', fmt='edf', overwrite=True, verbose=True)
+
+            # save new edf filename 
+            new_edf_filename = f"dreem_eeg_{spid}_{file_date}.edf"
+
+            #update harmonized data
+            new_edf_path = os.path.join(edf_out, new_edf_filename)
+            print(f"{spid}:: EDF file {new_edf_path} was recorded on {file_date.strftime('%Y-%m-%d')}")
+            os.rename(path_edf, new_edf_path)
+            print(f'saved files {new_edf_path}')
+
+        except shutil.SameFileError as e:
+            pass
+        except Exception as e:
+            print(f"Error : {spid}::{user_id} processing data for subject_id {pathi}: {e}")
+            return
+    else:
+        print(f'no files from {file_date} for {spid}')
+
 
 def dreem_process_edf(participant):
     OUTPUT_DATA_DIR = os.environ['OUTPUT_DATA_DIR']
@@ -127,93 +215,9 @@ def dreem_process_edf(participant):
     # # Get list of EDF files in the directory
     path_edfs = sorted([file for file in os.listdir(edf_out) if file.endswith(".edf") and not file.startswith("dreem_eeg_") ],reverse=True)
     path_edf = None  # Initialize path_edf outside the loop
-    
+
     for pathi in path_edfs:
-        try:
-            match = re.search(r'(\d{4}-\d{2}-\d{2})T', pathi)
-            if match:
-                file_date = re.search(r'\d{4}-\d{2}-\d{2}', pathi).group()
-                if not file_date:
-                    file_date = re.search(r'\d{4}:\d{2}:\d{2}', pathi).group()
-
-        except Exception as e:
-            print(f"Error : {spid}::{user_id} processing data for {pathi}: {e}")
-            continue
-
-
-        path_edf = pathi
-        # file_date = datetime.strptime(file_date, '%Y-%m-%d').date()
-        if path_edf:
-            try:
-                filename = path_edf
-                datetime_str = filename.split('@')[1].split('.')[1]
-                # print(datetime_str)
-                datetime_str= datetime_str.split('_')[1]
-                
-                # Parse the datetime string into a datetime object, including the timezone
-                datetime_obj = dt_parser.parse(datetime_str)
-                # Define the target timezone
-                target_tz = pytz.timezone(tz_str)
-                utc_fix = False
-                
-                if datetime_obj.tzinfo != target_tz:
-                    utc_fix = True
-                    datetime_obj = datetime_obj.astimezone(target_tz)
-                    print(f"Time adjusted to: {target_tz}")
-
-                file_time = datetime_obj.time()
-                file_tz = datetime_obj.tzinfo
-                
-                # Check if the time adjustment crosses over to the next day
-                if file_time > datetime.strptime('19:00:00', '%H:%M:%S').time():
-                    datetime_obj += timedelta(days=1)  # Add one day
-
-                file_date = datetime_obj.date()
-
-                path_edf = os.path.join(edf_out, path_edf)
-                # Check the size of the file
-                file_size = os.path.getsize(path_edf)  # Get file size in bytes
-                size_limit = 10 * 1024 * 1024  # 10MB in bytes ~ 1 hour of recording
-
-                if file_size < size_limit:
-                    print(f"{spid}:: File {path_edf} is smaller than 20MB and will be deleted.")
-                    os.remove(path_edf)  # Delete the file
-                    continue
-                else:
-                    print(f'{spid}::processing {path_edf}')
-                    # Proceed with loading the EDF file as it meets the size criteria
-                    EEG = mne.io.read_raw_edf(path_edf, preload=True)
-
-                # save new edf filename 
-                new_edf_filename = f"dreem_eeg_{spid}_{file_date}.edf"
-
-                #update harmonized data
-                new_edf_path = os.path.join(edf_out, new_edf_filename)
-
-                print(f"{spid}:: EDF file {new_edf_path} was recorded on {file_date.strftime('%Y-%m-%d')}")
-
-                # stage file
-                stagefile = f"dreem_hypno_{spid}_{file_date.strftime('%Y-%m-%d')}.csv"
-
-                if not Path(f'{csv_dir}/{stagefile}').is_file():
-                    print(f"Error : {spid}::{user_id} Stage file not found in {csv_dir} :", stagefile)
-
-                # path_stages = os.path.join(csv_dir, stagefile)
-                # eeg_sleep_instance = EEGSleep('Dreem')
-                # epochs, croppedData = eeg_sleep_instance.preprocess_eeg_data(path_edf, path_stages, preload=True, l_freq=0.75, h_freq=20)
-
-                # Save EEG data in EDF format
-                os.rename(path_edf, new_edf_path)
-                shutil.copyfile(new_edf_path, new_edf_path)
-
-                print(f'saved files {spid}::{file_date}')
-            except shutil.SameFileError as e:
-                pass
-            except Exception as e:
-                print(f"Error : {spid}::{user_id} processing data for subject_id {pathi}: {e}")
-                continue
-        else:
-            print(f'no files from {file_date} for {spid}')
+        __update_eeg_timezone((pathi, spid, user_id, tz_str))
 
     print(f"Completed Processing dreem_process_edf {spid}::{user_id} {datetime.now()}")
         
@@ -332,7 +336,7 @@ def dreem_process_hypno(participant):
                                 df.to_csv(os.path.join(output_folder,new_filename), index=False)
                 
                 except Exception as e:
-                    print(f'Error : {spid} {e}')
+                    print(f'Error : {spid}:{user_id}  {filename} :: {e}')
                     continue
 
     print(f"Completed Processing dreem_process_hypno {spid}::{user_id} {datetime.now()}")
