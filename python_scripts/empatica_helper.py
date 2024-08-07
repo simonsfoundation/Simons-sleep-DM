@@ -347,7 +347,7 @@ def bvp_raw_data(participant):
     print(f"Completed Processing bvp raw data for {spid}::{user_id} {datetime.now()}")
 
 
-def temprature_process_date_files(payload):
+def temperature_process_date_files(payload):
     date, participant = payload
     dfs = []
     user_id = participant['User ID']
@@ -404,13 +404,13 @@ def temprature_process_date_files(payload):
 
 
 
-def temprature_raw_data(participant):
+def temperature_raw_data(participant):
     DATA_DIR = os.environ['DATA_DIR']
     OUTPUT_DATA_DIR = os.environ['OUTPUT_DATA_DIR']
     user_id = participant['User ID']
     spid = participant['SPID']
     tz_str = participant['tz_str']
-    print(f"Processing temprature raw data for {spid}::{user_id} {datetime.now()}")
+    print(f"Processing temperature raw data for {spid}::{user_id} {datetime.now()}")
 
     #define path, folders, uzaser 
     participant_data_path = f'{DATA_DIR}/empatica/aws_data/1/1/participant_data/' # path to the folder that contains folder for each date
@@ -424,7 +424,7 @@ def temprature_raw_data(participant):
     dates = participant['dates']
     
     workers = Pool(int(os.environ['WORKERS']) if os.environ['WORKERS'] else 14)
-    results = workers.map(temprature_process_date_files, [(date, participant) for date in dates])
+    results = workers.map(temperature_process_date_files, [(date, participant) for date in dates])
     workers.close()
     workers.join()
 
@@ -442,4 +442,4 @@ def temprature_raw_data(participant):
         # Process the last file separately since it has no next file to combine with
         process_and_save_adjusted_days((spid,tz_str,output_folder,'temp',os.path.join(tz_temp, day_files[-1]),None))
     
-    print(f"Completed Processing temprature raw data for {spid}::{user_id} {datetime.now()}")
+    print(f"Completed Processing temperature raw data for {spid}::{user_id} {datetime.now()}")

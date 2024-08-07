@@ -4,7 +4,7 @@ import sys
 import multiprocessing
 import pandas as pd
 import argparse
-from empatica_helper import acc_raw_data, bvp_raw_data, temprature_raw_data, eda_raw_data
+from empatica_helper import acc_raw_data, bvp_raw_data, temperature_raw_data, eda_raw_data
 import os
 from functools import partial
 
@@ -82,7 +82,7 @@ if __name__ == '__main__':
         nargs="?",
         type=str,
         metavar="DATA_TYPE",
-        help="data type (acc | bvp | temprature | eda)",
+        help="data type (acc | bvp | temperature | eda)",
         default=None,
     )
     
@@ -120,7 +120,7 @@ if __name__ == '__main__':
         processes = []
         for _, participant in df.iterrows():
             print(f"Processing empatica data for {participant.SPID} : {dt.datetime.now()}")
-            censor_functions = [acc_raw_data, bvp_raw_data, temprature_raw_data, eda_raw_data]
+            censor_functions = [acc_raw_data, bvp_raw_data, temperature_raw_data, eda_raw_data]
         
             for function in censor_functions:
                 p = multiprocessing.Process(target=call_censor_processing_function, args=(function,participant,))
@@ -138,8 +138,8 @@ if __name__ == '__main__':
                 acc_raw_data(participant)
             elif args.data_type == 'bvp':
                 bvp_raw_data(participant)
-            elif args.data_type == 'temprature':
-                temprature_raw_data(participant)
+            elif args.data_type == 'temperature':
+                temperature_raw_data(participant)
             elif args.data_type == 'eda':
                 eda_raw_data(participant)
 
