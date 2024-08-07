@@ -93,7 +93,7 @@ def acc_process_date_files(payload):
                                     df_acTot = pd.DataFrame({'time': timeUNIX, 'x': acc['x'], 'y': acc['y'], 'z': acc['z']})
                                     dfs.append(df_acTot)
                                 except Exception as e:
-                                    print(f'Error : {avro_file} : {e}')
+                                    print(f'Error : {spid}::{user_id} {avro_file} : {e}')
                         if dfs:
                             daily_df = pd.concat(dfs, ignore_index=True)
                             daily_filename = f'{tz_temp}/empatica_acc_{spid}_{date}.csv'
@@ -375,19 +375,21 @@ def temprature_process_date_files(payload):
                             for datum in reader:
                                 data = datum
                             reader.close()
+                            try:
+                                temp = data["rawData"]["temperature"] #access specific metric 
+                                if len(data["rawData"]["temperature"]['values']) > 0:
 
-                            temp = data["rawData"]["temperature"] #access specific metric 
-                            if len(data["rawData"]["temperature"]['values']) > 0:
+                                    startSeconds = temp["timestampStart"] / 1000000 # convert timestamp to seconds
+                                    timeSeconds = list(range(0,len(temp['values'])))
+                                    timeUNIX = [t/temp["samplingFrequency"]+startSeconds for t in timeSeconds]
+                                    datetime_time = [datetime.utcfromtimestamp(x) for x in timeUNIX]
 
-                                startSeconds = temp["timestampStart"] / 1000000 # convert timestamp to seconds
-                                timeSeconds = list(range(0,len(temp['values'])))
-                                timeUNIX = [t/temp["samplingFrequency"]+startSeconds for t in timeSeconds]
-                                datetime_time = [datetime.utcfromtimestamp(x) for x in timeUNIX]
+                                    df_tempTot = pd.DataFrame({'time': timeUNIX, 'temp': temp['values']})
 
-                                df_tempTot = pd.DataFrame({'time': timeUNIX, 'temp': temp['values']})
-
-                                if not df_tempTot.empty:
-                                    dfs.append(df_tempTot)
+                                    if not df_tempTot.empty:
+                                        dfs.append(df_tempTot)
+                            except Exception as e:
+                                print(f'Error : {spid}::{user_id} {avro_file} : {e}')
 
                         if dfs:
 
