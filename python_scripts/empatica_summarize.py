@@ -1,4 +1,4 @@
-import datetime as dt
+from datetime import datetime
 import os
 import glob 
 import pytz
@@ -34,6 +34,7 @@ def process_participant_data(participant):
     spid = participant['SPID']
     tz_str = participant['tz_str']
     agg_emp_all = pd.DataFrame()
+    print(f"Processing acc raw data for {spid}::{user_id} {datetime.now()}")
 
     for d in dates:
         if not os.path.isdir(os.path.join(participant_data_path,d)):
@@ -124,7 +125,7 @@ def process_participant_data(participant):
         agg_emp_all['timestamp_iso'] = pd.to_datetime(agg_emp_all['timestamp_iso'])
         target_timezone = pytz.timezone(tz_str) 
         
-        print(f'{user} {target_timezone}')
+        print(f'{spid}:{user} {target_timezone}')
         agg_emp_all['timestamp_iso'] = agg_emp_all['timestamp_iso'].dt.tz_convert(target_timezone)
 
         target_path = f'{OUTPUT_DIR}/{spid}/empatica/summarized_data'
@@ -135,17 +136,10 @@ def process_participant_data(participant):
     
         if not os.path.isdir(target_path):# or not os.path.isdir(target_path_share):
             os.makedirs(target_path,exist_ok=True)
-            #os.makedirs(target_path_share,exist_ok=True)
-
-
-        #shutil.rmtree(target_path_share)
-
-
+            
         if not os.path.isdir(target_path):# or not os.path.isdir(target_path_share):
             os.makedirs(target_path,exist_ok=True)
-            #os.makedirs(target_path_share,exist_ok=True)
-
-
+            
         if os.path.isdir(target_path):
             # Iterate over all files and directories within 'target_path'
             for item in os.listdir(target_path):
@@ -163,11 +157,13 @@ def process_participant_data(participant):
 
             new_filename = f'empatica_measures_{spid}_{datei}.csv'
             agg_daily = agg_emp_all[agg_emp_all.timestamp_iso.dt.date == datei]
-
-            agg_daily.to_csv(os.path.join(target_path,new_filename), index =False)
-            
+            new_file_path = os.path.join(target_path,new_filename)
+            agg_daily.to_csv(new_file_path, index =False)
+            print(f'{spid}::{user_id} file saved {new_file_path}')
     else:
         print(f'error {agg_emp_all.columns}')    
+
+    print(f"Completed Processing acc raw data for {spid}::{user_id} {datetime.now()}")
 
 
 if __name__ == '__main__':
