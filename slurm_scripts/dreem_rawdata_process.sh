@@ -1,6 +1,6 @@
 #!/bin/bash
-#SBATCH --job-name=sleep_withings
-#SBATCH --output=/mnt/home/nshah/Simons-sleep-DM/withing_job.log
+#SBATCH --job-name=sleep_dreem
+#SBATCH --output=/mnt/home/nshah/Simons-sleep-DM/dreem_job.log
 #SBATCH --mem=256GB
 #SBATCH --nodes=1
 #SBATCH --ntasks=1  # Adjust based on available resources and desired concurrency
