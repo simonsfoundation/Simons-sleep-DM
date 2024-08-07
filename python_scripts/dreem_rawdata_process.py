@@ -104,7 +104,7 @@ if __name__ == '__main__':
     )
     
     args = parser.parse_args()
-
+    
     if args.data_dir is None:
         sys.exit("--data-dir is mandatory")
 
@@ -193,7 +193,7 @@ if __name__ == '__main__':
 
     # print(participants,'>>>>>>>>>>>>>')
     ## move raw data files to ouput directory by user 
-    if args.skip is None:
+    if args.skip_move_files is None:
         print("moving raw data files to ouput directory by user")
         move_files(file_users_map, participants, source_dir)
     
