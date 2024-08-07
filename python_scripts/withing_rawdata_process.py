@@ -80,7 +80,7 @@ def process_withings_shared_data(participant):
                         'raw_bed_respiratory-rate.csv']:
                         
             with zipfile.ZipFile(input_zip, 'r') as zip_ref:
-                
+
                 file_type = file.replace('raw_bed_','').replace('.csv','')
                 if file == 'sleep.csv':
                     file_name = f'withings_report_{spid}.csv'
@@ -129,10 +129,6 @@ def process_withings_shared_data(participant):
                 dfi = dfi.drop_duplicates()
                 dfi.to_csv(os.path.join(output_share_dir,file_name), index = False)
 
-    # for file in os.listdir(output_share_dir):
-    #         if file.startswith('withings'):
-    #             os.remove(os.path.join(output_share_dir,file))
-    #     print(user)
 
 if __name__ == '__main__':
 
