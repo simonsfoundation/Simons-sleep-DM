@@ -74,6 +74,17 @@ if __name__ == '__main__':
         help="SPID",
         default=None,
     )
+
+
+    parser.add_argument(
+        "-t",
+        "--data-type",
+        nargs="?",
+        type=str,
+        metavar="DATA_TYPE",
+        help="data type (acc | bvp | temprature | eda)",
+        default=None,
+    )
     
     args = parser.parse_args()
 
@@ -105,17 +116,30 @@ if __name__ == '__main__':
     if args.spid:
         df = df.loc[df['SPID'] == args.spid]
 
-    processes = []
-    for _, participant in df.iterrows():
-        print(f"Processing empatica data for {participant.SPID} : {dt.datetime.now()}")
-        censor_functions = [acc_raw_data, bvp_raw_data, temprature_raw_data, eda_raw_data]
-    
-        for function in censor_functions:
-            p = multiprocessing.Process(target=call_censor_processing_function, args=(function,participant,))
-            processes.append((p, participant.SPID, function.__name__ ))
-            p.start()
+    if args.data_type is None:
+        processes = []
+        for _, participant in df.iterrows():
+            print(f"Processing empatica data for {participant.SPID} : {dt.datetime.now()}")
+            censor_functions = [acc_raw_data, bvp_raw_data, temprature_raw_data, eda_raw_data]
+        
+            for function in censor_functions:
+                p = multiprocessing.Process(target=call_censor_processing_function, args=(function,participant,))
+                processes.append((p, participant.SPID, function.__name__ ))
+                p.start()
 
-    # Wait for all processes to finish
-    for p, spid, function in processes:
-        p.join()
-        print(f"Completed {function} for {spid} : {dt.datetime.now()}")
+        # Wait for all processes to finish
+        for p, spid, function in processes:
+            p.join()
+            print(f"Completed {function} for {spid} : {dt.datetime.now()}")
+
+    else:
+        for _, participant in df.iterrows():
+            if args.data_type == 'acc':
+                acc_raw_data(participant)
+            elif args.data_type == 'bvp':
+                bvp_raw_data(participant)
+            elif args.data_type == 'temprature':
+                temprature_raw_data(participant)
+            elif args.data_type == 'eda':
+                eda_raw_data(participant)
+
