@@ -92,6 +92,16 @@ if __name__ == '__main__':
         help="SPID",
         default=None,
     )
+
+    parser.add_argument(
+        "-s",
+        "--skip-move-files",
+        nargs="?",
+        type=str,
+        metavar="SKIP",
+        help="skip move_files",
+        default=None,
+    )
     
     args = parser.parse_args()
 
@@ -183,8 +193,9 @@ if __name__ == '__main__':
 
     # print(participants,'>>>>>>>>>>>>>')
     ## move raw data files to ouput directory by user 
-    print("moving raw data files to ouput directory by user")
-    move_files(file_users_map, participants, source_dir)
+    if args.skip is None:
+        print("moving raw data files to ouput directory by user")
+        move_files(file_users_map, participants, source_dir)
     
     pDf = pd.DataFrame(participants.values())
     if args.spid:

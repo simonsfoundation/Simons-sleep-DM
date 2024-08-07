@@ -81,6 +81,11 @@ def dreem_process_report(participant):
 
     directory = f'{OUTPUT_DATA_DIR}/{spid}/dreem/dreem_reports'
 
+    if not Path(directory).is_dir():
+        print(f"Error : {spid}:{user_id} can't find dreem_reports")
+        return
+
+    print(f"Processing dreem_process_edf {spid}::{user_id} {datetime.now()}\n-----------------------------------------\n")
     for file in os.listdir(directory):
         try:
             datetime_str = file.split('beacon.study_')[-1].replace('_endpoints.csv','')
@@ -100,9 +105,9 @@ def dreem_process_report(participant):
         # print(file,'>>>>', file_date,'>>>>',f'{directory}/{filename}')
         os.rename(f'{directory}/{file}', f'{directory}/{filename}')
 
-    date_list=[]
-    date = None
-    
+    print(f"Completed Processing dreem_process_edf {spid}::{user_id} {datetime.now()}\n-----------------------------------------\n")
+
+        
 
 
 def __update_eeg_timezone(payload):
