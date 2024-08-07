@@ -62,11 +62,12 @@ def move_files(file_users_map, participants, source_dir):
                 print("Error : can't find participant for file : {file}")
             else:
                 dest_dir = f"{os.environ['OUTPUT_DATA_DIR']}/{participant['spid']}/dreem/{dir_type}/" 
+                
                 if not os.path.exists(dest_dir):
                     os.makedirs(dest_dir)
 
                 if filename not in os.listdir(dest_dir):
-                    shutil.copy(os.path.join(file_dir, filename), os.path.join(dest_dir, filename))
+                    shutil.copyfile(os.path.join(file_dir, filename), os.path.join(dest_dir, filename))
                     
 
 
@@ -114,7 +115,7 @@ def dreem_process_edf(participant):
     edf_out = output_folder + '/edf/'
     csv_dir = output_folder + '/hypno/'
 
-    print(f"Processing dreem_process_edf {spid}::{user_id} {datetime.now()}")
+    print(f"Processing dreem_process_edf {spid}::{user_id} {datetime.now()}\n-----------------------------------------\n")
 
     # date_list = [re.search(r'\d{4}-\d{2}-\d{2}', file).group() for file in os.listdir(edf_out) if file.endswith(".edf") and not file.startswith("eeg") ]
     
@@ -136,7 +137,7 @@ def dreem_process_edf(participant):
                     file_date = re.search(r'\d{4}:\d{2}:\d{2}', pathi).group()
 
         except Exception as e:
-            print(f"Error : processing data for {spid} {pathi}: {e}")
+            print(f"Error : {spid}::{user_id} processing data for {pathi}: {e}")
             continue
 
 
@@ -203,11 +204,13 @@ def dreem_process_edf(participant):
 
                 # Save EEG data in EDF format
                 os.rename(path_edf, new_edf_path)
-                shutil.copy(new_edf_path, new_edf_path)
+                shutil.copyfile(new_edf_path, new_edf_path)
 
                 print(f'saved files {spid}::{file_date}')
+            except shutil.SameFileError as e:
+                pass
             except Exception as e:
-                print(f"Error : {spid} processing data for subject_id {pathi}: {e}")
+                print(f"Error : {spid}::{user_id} processing data for subject_id {pathi}: {e}")
                 continue
         else:
             print(f'no files from {file_date} for {spid}')
